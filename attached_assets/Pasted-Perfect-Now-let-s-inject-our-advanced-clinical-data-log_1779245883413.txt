@@ -1,0 +1,21 @@
+Perfect. Now, let's inject our advanced clinical data logic and machine learning constraints directly into the application state and UI components. Do not just document this—implement it functionally into the active mockup:
+
+1. Dyadic (2-Person) Interaction & Target Variable Y:
+   - Update the backend logic so the text simulation explicitly models a TWO-person conversation (Interlocutor <-> Patient).
+   - In the underlying code architecture, treat the "Emotional Baseline" as our primary target variable (Y) that the system aims to predict over time, while the Big Five (O-C-E-A-N) metrics act as stable feature anchors. 
+   - Ensure the interlocutor's message sentiment directly influences the patient's immediate emotional state calculation loop.
+
+2. Dynamic Time-Lapse, Silence Logs, and Non-Linear History:
+   - Update the "Conversation Timeline" and chat data generator. Do NOT make the conversation emotional context static. It must change dynamically over a time-lapse (hours/days).
+   - Randomly inject "Extended Silence / No-Response" blocks into the message array timestamps. If a patient remains silent for hours under high cognitive fatigue, reflect this as a sharp, non-linear spike in the "Fatigue Progression Chart" and a dip in the emotional curve.
+   - Relabel the Right Panel analytics block to "Longitudinal Clinical History Dashboard" to track these non-linear emotional peaks and valleys across days, proving that patient states fluctuate naturally.
+
+3. Human-in-the-Loop (HITL) Flagging System:
+   - Next to every inferred data tag or message snippet in the chat simulator, add a small interactive "Flag" icon (warning/flag marker).
+   - When a researcher or user clicks this flag, trigger a temporary subtle UI notification overlay or state update reading: "Inference variance flagged by user. Token sequence and ground-truth variance queued for Reinforcement Learning (RLHF) model re-calibration."
+
+4. Automated Insight Analytics (LLM Feature Mockup):
+   - At the bottom of the "Longitudinal Clinical History Dashboard", add an expandable text block titled "VoxAI Clinical Insights & Flag Summary". 
+   - Populate this card with simulated, automated research insights based on the active dashboard data (e.g., "ALERT: Patient manual overrides increased by 35% during evening hours. High correlation with ocular fatigue drops.").
+
+Maintain our muted, low-glare clinical color palette (Midnight Navy backgrounds, Muted Slate cards, and softened Terracotta/Orange accent highlights for the high-intent manual override tracks). Let's build this directly!
