@@ -1,0 +1,51 @@
+You are improving our existing high-fidelity UI mockup for the research tool: "VoxAI Synthetic Dialogue Generator". The current version has the correct three-panel layout, but the colors are too generic, saturated, and aggressive for eye-tracking users. We need to upgrade the aesthetics based on a muted, clinical interpretation of The Scott-Morgan Foundation's branding, optimizing every element for patients with ALS to prevent ocular fatigue.
+
+DO NOT REDESIGN FROM SCRATCH. Upgrade the existing layout and code by injecting these strict behavioral, clinical, and aesthetic constraints:
+
+---
+
+### 🎨 I. OCULAR-ACCESSIBILITY & MUTED BRANDING (Designed for ALS)
+Modify the global CSS and Tailwind colors to ensure low light emission and high text contrast:
+1. Palette Rules (Muted, Non-Vibrating Colors):
+   - Background (Dark Mode): A deep, matte Midnight Navy Slate (#0b111e or #080d16). It must be dark and opaque, completely eliminating glare.
+   - Primary Accent & High-Intent Elements: A soft, muted Burnt Orange or Terracotta tone (#d97706 or #c2410c). Use it only for critical borders and indicators, avoiding high-brilliance or glowing neon effects.
+   - Secondary Elements: Soft muted lavenders, dusty blues (#64748b), and off-white/cream text (#e2e8f0) to keep reading comfortable for long sessions.
+   - Theme Toggle: Add a clean Light/Dark mode switch in the top navigation bar. 
+     * Dark Mode: Low-emission dark slate background with soft gray cards.
+     * Light Mode: Clinical cream/soft-gray background (#f8fafc), dark navy text, avoiding stark blinding pure whites.
+2. Target Sizing: Ensure all clickable or simulated eye-gaze targets have substantial padding, rounded borders, and clear spacing to assist accurate dwelling.
+
+---
+
+### 🧠 II. CORE SYSTEM UPGRADES & SCIENTIFIC LOGIC
+
+1. Big Five Traits — Precision Scoreboard:
+   - Replace all horizontal slider tracks for Big Five traits with numeric input fields (0.0 to 1.0 scale).
+   - Allow precise decimal inputs (e.g., Openness: 0.65, Neuroticism: 0.80).
+   - Display a vertical, clean layout for the ground-truth labels (O, C, E, A, N). Add a subtle UI validation label if a score falls outside the 0.0 - 1.0 boundary.
+
+2. Expanded Emotional Baseline & Variable Constraints:
+   - Dropdown Options: Neutral, Positive, Anxious, Mildly Depressed, Depressed, Highly Motivated, Fatigued, Emotionally Unstable.
+   - Intelligent Variable Constraints: Program a lightweight JavaScript listener. When a baseline is selected, highlight or automatically set recommended boundaries for the Big Five metrics. 
+     * If "Depressed" is picked -> Cap Extraversion and Openness to low ranges, shift Neuroticism higher.
+     * If "Highly Motivated" is picked -> Boost Conscientiousness scores.
+   - Display a small helpful caption under the profile stating: "Ground-truth trait boundaries automatically balanced against emotional baseline selection."
+
+3. New Variable: "Conversation-Specific Emotional State":
+   - Add a distinct independent dropdown titled "Conversation Emotional Context" (Options: Neutral, Anxious, Stressful, Supportive, Positive, Routine).
+   - Add a tooltip explaining: "This represents the transient emotional tone of this specific interaction, which can act independently from the patient's long-term emotional baseline."
+
+4. Multi-Day Timeline & Persistent Chat Tracking:
+   - Configuration: Add a "Conversation Timeline" sub-card in the configuration panel. Allow researchers to select Duration (1 to 7 Days) and Mode (Consecutive vs Intermittent days).
+   - Conversation Length: Add an entry parameter for "Total Conversation Target Length" (Short: 5-10 turns, Medium: 10-25 turns, Long: 25-50 turns).
+   - Chat Display Update: Modify the Center Panel message simulator to group messages explicitly by day using clean visual dividers (e.g., "--- Monday ---", "--- Wednesday (No interaction logged on Tuesday) ---") maintaining dialogue continuity.
+
+5. Upgraded Analytics Dashboard & Ground Truth Realism:
+   - Right Panel Charts: Implement smooth, interactive line charts tracking both "Fatigue Progression Curve" and "Emotional Trajectory" that update dynamically step-by-step as conversation turns advance.
+   - Explicit Labeling: Clearly display a Radar or Bar chart graphic explicitly marked: "Ground Truth Model Targets (Used for Multi-Label ML Inference Training Calibration)".
+   - Voice Output Indicator: Add a subtle assistive audio badge/icon next to chat bubbles labeled "Voice Output Synthesized" to show if the text utilized the digital voice engine.
+
+6. Localization Engine (Language Switch):
+   - Add a global language toggle (EN / ES) in the top navigation. When switched, update all application labels, tooltips, and default placeholder data from English to Spanish seamlessly.
+
+Ensure all interactive inputs, mode switches, and export scripts (JSON/CSV) link correctly to the UI controls so the dashboard functions perfectly as a live research environment.
