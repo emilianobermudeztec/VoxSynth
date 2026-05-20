@@ -1,0 +1,37 @@
+Create a comprehensive, beautiful single-page dashboard mockup for the "VoxAI Synthetic Dialogue Generator" using HTML, Tailwind CSS, and vanilla JavaScript. 
+
+The application must strictly follow the dark-cyberpunk and human-centric design philosophy of The Scott-Morgan Foundation, moving completely away from standard generic white/gray templates.
+
+### BRAND IDENTITY & COLORS (Strict Guidelines)
+- Background: Deep pitch-black (#09090b) or ultra-dark slate (#0c0a09).
+- Primary Accents & Buttons: High-visibility Electric Neon Green (similar to the foundation's official branding) for primary actions, generating text, and major call-to-actions.
+- Accents: Cybernetic deep purples and soft glowing whites for container outlines.
+- Typography & UX: Clean, modern sans-serif with a strong visual hierarchy. Large interactive targets to honor ALS eye-gaze tracking limitations.
+
+### MAIN LAYOUT STRUCTURE (Three-Panel Grid)
+
+1. LEFT PANEL: "Simulation Controls & Persona Settings"
+- Grouped inside clean, dark cards with thin glowing neon-green borders.
+- Patient Profile: Sliders for Big Five Traits (Openness, Extraversion, Neuroticism), an "Emotional Baseline" dropdown (Neutral, Anxious, Depressed, Optimistic), and a "Cognitive Fatigue Level" slider.
+- Hardware Simulation: A slider for "AI Word Prediction Dependency vs. Manual Override Probability".
+- Interlocutor & Context: Dropdowns for Type (Doctor, Caregiver, Family) and a checklist for Emotional Triggers.
+
+2. CENTER PANEL: "Live Stream-of-Consciousness Simulator"
+- A large, beautiful multi-turn conversation simulator with a prominent "GENERATE EXPERIMENT" button styled in high-contrast neon green at the top.
+- Left-aligned chat bubbles for Interlocutor messages (muted gray/purple style).
+- Right-aligned chat bubbles for Patient responses, split into two distinct styles:
+  * Style A (AI-Predicted): Tagged with a small label "Suggested via VoxAI Engine" in a soft glowing outline.
+  * Style B (Manual Override): Tagged with an explicit pencil icon and labeled "Manual Override (High Intent)". Give this card a distinctive golden or glowing amber accent line to represent the patient's physical effort.
+- Every message bubble must dynamically display small metadata tags: Timestamp and a dynamic fatigue badge (e.g., "Fatigue level: 75%").
+
+3. RIGHT PANEL: "Clinical Analytics & Export Engine"
+- Psychological Ground Truth: Interactive metrics displaying the current O-E-N trait alignment.
+- Metrics Tracker: Live text counters tracking "Total Conversational Turns", "AI Selection Ratio", and a simulated "Fatigue Progression Curve".
+- Research Data Export: Two prominent, styled buttons labeled "Export Session Data as JSON" and "Export Metrics to CSV".
+
+### TOP NAVIGATION & CO-DESIGN STATEMENT
+- Include a sleek header displaying the "VoxAI" logo alongside a "The Scott-Morgan Foundation x Tec de Monterrey" partnership badge.
+- Add a dark button or modal tab for the "Predefined Persona Library" (e.g., "Load High-Anxiety Profile", "Load Advanced Fatigue Scenario").
+- Add a subtle, inspiring footer quote that mirrors the foundation's mission: "Co-designed with the extreme user to accelerate human dignity through Artificial Intelligence."
+
+Ensure the JavaScript code handles all panel states gracefully, making sliders and mode-switches interactively update the UI layout without relying on external heavy backend dependencies.
