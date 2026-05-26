@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import voxsynthLogo from "@/assets/voxsynth-logo.png";
 import { 
   Activity, 
   Settings, 
@@ -115,6 +116,23 @@ const SCENARIO_LIBRARY = {
 const sampleMidpoint = (range: readonly [number,number]) => +((range[0]+range[1])/2).toFixed(2);
 
 const toLabel = (s: string) => s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+const PERSONA_COLORS: Record<string, string> = {
+  anxious_low_energy:      "#f59e0b",
+  severe_depressive_state: "#ef4444",
+  depressed_withdrawn:     "#f97316",
+  motivated_resilient:     "#10b981",
+  fatigue_dominant:        "#8b5cf6",
+  socially_engaged:        "#3b82f6",
+  emotionally_unstable:    "#ec4899",
+};
+
+const initPersonaMix = () => {
+  const ids = SCENARIO_LIBRARY.patientPersonas.map(p => p.id);
+  const base = Math.floor(100 / ids.length);
+  const rem  = 100 - base * ids.length;
+  return Object.fromEntries(ids.map((id, i) => [id, i === 0 ? base + rem : base]));
+};
 
 const translations = {
   EN: {
@@ -262,6 +280,8 @@ export function Dashboard() {
   };
 
   const [simulationN, setSimulationN] = useState(1);
+  const [personaMix, setPersonaMix] = useState<Record<string, number>>(initPersonaMix);
+  const [personaMixMode, setPersonaMixMode] = useState<'pct' | 'abs'>('pct');
   const [selectedPersonaId, setSelectedPersonaId] = useState("anxious_low_energy");
   const [interlocutor, setInterlocutor] = useState('doctor');
   const [conversationContext, setConversationContext] = useState('daily_chat');
@@ -326,6 +346,26 @@ export function Dashboard() {
         break;
     }
   }, [selectedSituational]);
+
+  const updatePersonaMix = useCallback((changedId: string, newPct: number) => {
+    setPersonaMix(prev => {
+      const ids = SCENARIO_LIBRARY.patientPersonas.map(p => p.id);
+      const otherIds = ids.filter(id => id !== changedId);
+      const remaining = 100 - newPct;
+      const currentOtherTotal = otherIds.reduce((s, id) => s + (prev[id] || 0), 0);
+      if (currentOtherTotal === 0) {
+        const perOther = Math.floor(remaining / otherIds.length);
+        const extra = remaining - perOther * otherIds.length;
+        return { ...prev, [changedId]: newPct, ...Object.fromEntries(otherIds.map((id, i) => [id, i === 0 ? perOther + extra : perOther])) };
+      }
+      const scale = remaining / currentOtherTotal;
+      const scaled: Record<string, number> = Object.fromEntries(otherIds.map(id => [id, Math.round((prev[id] || 0) * scale)]));
+      const scaledTotal = Object.values(scaled).reduce((s, v) => s + v, 0);
+      const diff = remaining - scaledTotal;
+      if (diff !== 0 && otherIds.length > 0) scaled[otherIds[0]] = (scaled[otherIds[0]] || 0) + diff;
+      return { ...prev, [changedId]: newPct, ...scaled };
+    });
+  }, []);
 
   const handleFlagMessage = (id: number) => {
     setFlaggedMessages(prev => {
@@ -615,8 +655,15 @@ Situational triggers cascade into emotional state before each turn generation.`;
       {/* Header */}
       <header className="h-16 border-b flex items-center justify-between px-6 shrink-0" style={{ backgroundColor: colors.cardBg, borderColor: colors.border }}>
         <div className="flex items-center gap-4">
+          <img
+            src={voxsynthLogo}
+            alt="VoxSynth Lab"
+            className="h-9 object-contain"
+            style={{ filter: isDark ? 'brightness(0) invert(1)' : 'none' }}
+          />
+          <div className="h-6 w-px" style={{ backgroundColor: colors.border }} />
           <div className="flex items-center gap-2 font-bold text-xl tracking-tight" style={{ color: colors.primary }}>
-            <Activity className="w-6 h-6" />
+            <Activity className="w-5 h-5" />
             {t.appTitle}
           </div>
           <span className="text-sm font-medium px-2 py-1 rounded" style={{ backgroundColor: colors.bg, color: colors.secondary }}>
@@ -703,8 +750,75 @@ Situational triggers cascade into emotional state before each turn generation.`;
                 />
               </div>
               {simulationN > 1 && (
-                <div className="text-[10px] px-2 py-1 rounded" style={{ backgroundColor: `${colors.secondary}15`, color: colors.secondary }}>
+                <div className="text-[10px] px-2 py-1 rounded" style={{ backgroundColor: colors.secondary + '15', color: colors.secondary }}>
                   {t.batchMode.replace('{N}', simulationN.toString())}
+                </div>
+              )}
+
+              {/* Population Mix — visible only for N > 1 */}
+              {simulationN > 1 && (
+                <div className="mt-3 border rounded p-3" style={{ backgroundColor: colors.bg, borderColor: colors.border }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: colors.heading }}>Population Mix</span>
+                    <div className="flex rounded overflow-hidden border text-[9px]" style={{ borderColor: colors.border }}>
+                      <button
+                        onClick={() => setPersonaMixMode('pct')}
+                        className="px-2 py-0.5 font-medium"
+                        style={{ backgroundColor: personaMixMode === 'pct' ? colors.primary : colors.cardBg, color: personaMixMode === 'pct' ? '#fff' : colors.secondary }}
+                      >%</button>
+                      <button
+                        onClick={() => setPersonaMixMode('abs')}
+                        className="px-2 py-0.5 font-medium"
+                        style={{ backgroundColor: personaMixMode === 'abs' ? colors.primary : colors.cardBg, color: personaMixMode === 'abs' ? '#fff' : colors.secondary }}
+                      >N</button>
+                    </div>
+                  </div>
+
+                  {/* Stacked bar */}
+                  <div className="h-3 w-full rounded-full overflow-hidden flex mb-3">
+                    {SCENARIO_LIBRARY.patientPersonas.map(p => {
+                      const pct = personaMix[p.id] || 0;
+                      return (
+                        <div
+                          key={p.id}
+                          style={{ width: pct + '%', backgroundColor: PERSONA_COLORS[p.id], transition: 'width 0.3s ease' }}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Per-persona rows */}
+                  <div className="space-y-1.5">
+                    {SCENARIO_LIBRARY.patientPersonas.map(p => {
+                      const pct = personaMix[p.id] || 0;
+                      const absN = Math.round(simulationN * pct / 100);
+                      const displayVal = personaMixMode === 'pct' ? pct + '%' : 'N=' + absN;
+                      return (
+                        <div key={p.id} className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: PERSONA_COLORS[p.id] }} />
+                          <span className="text-[9px] flex-1 leading-tight truncate" style={{ color: colors.text }}>{toLabel(p.id)}</span>
+                          <span className="text-[9px] font-mono w-8 text-right shrink-0" style={{ color: colors.secondary }}>{displayVal}</span>
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            value={pct}
+                            onChange={(e) => updatePersonaMix(p.id, parseInt(e.target.value))}
+                            className="w-16 shrink-0"
+                            style={{ accentColor: PERSONA_COLORS[p.id] }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Sum validation */}
+                  <div className="mt-2 pt-2 border-t flex justify-between text-[9px]" style={{ borderColor: colors.border }}>
+                    <span style={{ color: colors.secondary }}>Σ total</span>
+                    <span className="font-mono font-bold" style={{ color: Object.values(personaMix).reduce((s, v) => s + v, 0) === 100 ? colors.primary : '#ef4444' }}>
+                      {Object.values(personaMix).reduce((s, v) => s + v, 0)}%
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
@@ -1137,7 +1251,15 @@ Situational triggers cascade into emotional state before each turn generation.`;
                 </div>
 
                 <div className="border rounded p-4" style={{ backgroundColor: colors.bg, borderColor: colors.border }}>
-                  <span className="text-sm font-semibold mb-2 block" style={{ color: colors.secondary }}>{t.emotionalTrajectory}</span>
+                  <div className="flex justify-between items-baseline mb-1">
+                    <span className="text-sm font-semibold" style={{ color: colors.secondary }}>{t.emotionalTrajectory}</span>
+                    <span className="text-[9px] uppercase font-bold tracking-wider" style={{ color: colors.secondary }}>0.0 – 1.0</span>
+                  </div>
+                  <div className="flex gap-1 text-[8px] mb-1" style={{ color: colors.secondary }}>
+                    <span className="px-1.5 py-0.5 rounded" style={{ backgroundColor: '#10b981' + '20', color: '#10b981' }}>Stable ≥ 0.7</span>
+                    <span className="px-1.5 py-0.5 rounded" style={{ backgroundColor: '#f59e0b' + '20', color: '#f59e0b' }}>At Risk 0.3–0.7</span>
+                    <span className="px-1.5 py-0.5 rounded" style={{ backgroundColor: '#ef4444' + '20', color: '#ef4444' }}>Severe &lt; 0.3</span>
+                  </div>
                   <div className="h-24 w-full pl-6 pb-2">
                     <LineChart data={metrics.emotionalHistory} color="#0d9488" yLabels={['1.0', '0.5', '0.0']} />
                   </div>
