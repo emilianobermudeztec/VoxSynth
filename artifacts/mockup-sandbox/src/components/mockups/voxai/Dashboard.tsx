@@ -5,57 +5,146 @@ import {
   Download, 
   Cpu, 
   User, 
-  Pencil, 
   Play, 
   X, 
-  Check,
   Brain,
-  Eye,
-  HeartPulse,
   Database,
   Moon,
   Sun,
   Globe,
-  Info,
   Volume2,
   Flag,
   ChevronDown,
   ChevronUp
 } from "lucide-react";
 
-const INTERLOCUTORS = ['doctor', 'caregiver', 'family_member', 'friend', 'therapist'] as const;
-const CONVERSATION_CONTEXTS = ['daily_chat', 'medical_consultation', 'emotional_support', 'routine_update', 'symptom_reporting', 'functional_decline', 'aac_frustration', 'care_planning'] as const;
-const SITUATIONAL_VARIABLES = ['morning_rested', 'evening_exhausted', 'post_therapy_fatigue', 'after_bad_medical_news', 'routine_comfort', 'physical_discomfort_trigger', 'social_isolation_state'] as const;
+const SCENARIO_LIBRARY = {
+  patientPersonas: [
+    {
+      id: "anxious_low_energy",
+      description: "Patient with high anxiety, low energy, and fatigue-dominant behavior",
+      personality: { O:[0.2,0.4], C:[0.3,0.5], E:[0.1,0.3], A:[0.5,0.7], N:[0.7,0.9] },
+      baselineMood: "nervous",
+      psychologicalCondition: "high_anxiety",
+      diseaseStage: { stage:"mid", motorFunction:"moderate", communicationAbility:"aac_dependent" },
+      cognitiveFatiguePattern: { trend:"increasing", intensity:"medium" }
+    },
+    {
+      id: "severe_depressive_state",
+      description: "Severely depressed patient with minimal engagement, high withdrawal, and reduced communication effort",
+      personality: { O:[0.1,0.3], C:[0.2,0.4], E:[0.05,0.2], A:[0.3,0.6], N:[0.85,1.0] },
+      baselineMood: "sad",
+      psychologicalCondition: "severe_depression",
+      diseaseStage: { stage:"advanced", motorFunction:"low", communicationAbility:"high_dependency_AAC" },
+      cognitiveFatiguePattern: { trend:"high", intensity:"very_high" }
+    },
+    {
+      id: "depressed_withdrawn",
+      description: "Low engagement, depressive tendencies, reduced communication",
+      personality: { O:[0.2,0.3], C:[0.3,0.5], E:[0.1,0.2], A:[0.4,0.6], N:[0.8,0.95] },
+      baselineMood: "sad",
+      psychologicalCondition: "depression",
+      diseaseStage: { stage:"advanced", motorFunction:"low", communicationAbility:"high_dependency_AAC" },
+      cognitiveFatiguePattern: { trend:"high", intensity:"high" }
+    },
+    {
+      id: "motivated_resilient",
+      description: "Engaged and emotionally stable patient with adaptive behavior",
+      personality: { O:[0.6,0.8], C:[0.7,0.9], E:[0.5,0.7], A:[0.6,0.8], N:[0.2,0.4] },
+      baselineMood: "motivated",
+      psychologicalCondition: "none",
+      diseaseStage: { stage:"early", motorFunction:"high", communicationAbility:"mostly_independent" },
+      cognitiveFatiguePattern: { trend:"low", intensity:"low" }
+    },
+    {
+      id: "fatigue_dominant",
+      description: "Fatigue heavily affects communication patterns and responsiveness",
+      personality: { O:[0.3,0.5], C:[0.4,0.6], E:[0.2,0.4], A:[0.5,0.7], N:[0.6,0.8] },
+      baselineMood: "fatigued",
+      psychologicalCondition: "none",
+      diseaseStage: { stage:"mid", motorFunction:"moderate", communicationAbility:"aac_assisted" },
+      cognitiveFatiguePattern: { trend:"strong_increase", intensity:"high" }
+    },
+    {
+      id: "socially_engaged",
+      description: "Maintains active social engagement despite disease",
+      personality: { O:[0.6,0.8], C:[0.6,0.8], E:[0.7,0.9], A:[0.7,0.9], N:[0.2,0.4] },
+      baselineMood: "positive",
+      psychologicalCondition: "none",
+      diseaseStage: { stage:"early", motorFunction:"high", communicationAbility:"independent" },
+      cognitiveFatiguePattern: { trend:"moderate", intensity:"medium" }
+    },
+    {
+      id: "emotionally_unstable",
+      description: "Frequent emotional fluctuations and inconsistent communication behavior",
+      personality: { O:[0.4,0.6], C:[0.3,0.5], E:[0.2,0.5], A:[0.4,0.6], N:[0.8,0.95] },
+      baselineMood: "moody",
+      psychologicalCondition: "emotional_instability",
+      diseaseStage: { stage:"mid", motorFunction:"moderate", communicationAbility:"aac_dependent" },
+      cognitiveFatiguePattern: { trend:"variable", intensity:"medium" }
+    }
+  ],
+  interlocutors: [
+    { id:"doctor", role:"Doctor", communicationStyle:"professional", empathyLevel:"medium" },
+    { id:"caregiver", role:"Caregiver", communicationStyle:"supportive", empathyLevel:"high" },
+    { id:"family_member", role:"Family Member", communicationStyle:"informal", empathyLevel:"high" },
+    { id:"friend", role:"Friend", communicationStyle:"casual", empathyLevel:"medium" },
+    { id:"therapist", role:"Therapist", communicationStyle:"empathetic", empathyLevel:"very_high" }
+  ],
+  conversationContexts: [
+    { id:"daily_chat", description:"Casual everyday interaction", tone:"neutral" },
+    { id:"medical_consultation", description:"Clinical discussion with a doctor", tone:"structured" },
+    { id:"emotional_support", description:"Conversation focused on emotional support and mental state", tone:"supportive" },
+    { id:"routine_update", description:"Daily status or symptom updates", tone:"informative" },
+    { id:"symptom_reporting", description:"Patient describing physical or cognitive symptoms", tone:"clinical" },
+    { id:"functional_decline", description:"Discussion about loss of abilities (speech, movement)", tone:"emotional" },
+    { id:"aac_frustration", description:"Difficulty or frustration using assistive communication device", tone:"frustrated" },
+    { id:"care_planning", description:"Planning care, routines, or medical adjustments", tone:"structured" }
+  ],
+  situationalVariables: [
+    { id:"morning_routine", timeOfDay:"morning", recentEvents:["rested"], emotionalTriggers:["neutral"] },
+    { id:"evening_fatigue", timeOfDay:"evening", recentEvents:["long_day"], emotionalTriggers:["fatigue","low_energy"] },
+    { id:"after_bad_news", timeOfDay:"afternoon", recentEvents:["stressful_event"], emotionalTriggers:["anxiety","sadness"] },
+    { id:"post_medication", timeOfDay:"night", recentEvents:["medication_taken"], emotionalTriggers:["drowsiness"] },
+    { id:"motor_loss_event", timeOfDay:"evening", recentEvents:["loss_of_function"], emotionalTriggers:["frustration","sadness"] },
+    { id:"unexpected_good_day", timeOfDay:"afternoon", recentEvents:["improved_condition"], emotionalTriggers:["hope","calm"] },
+    { id:"device_issue", timeOfDay:"night", recentEvents:["aac_issue"], emotionalTriggers:["frustration","stress"] }
+  ]
+} as const;
+
+const sampleMidpoint = (range: readonly [number,number]) => +((range[0]+range[1])/2).toFixed(2);
 
 const toLabel = (s: string) => s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
 const translations = {
   EN: {
     appTitle: "VoxAI",
-    appSubtitle: "Synthetic Dialogue Generator v3",
+    appSubtitle: "Synthetic Dialogue Generator v4",
     sessionActive: "Session Active",
     simulationControls: "Simulation Controls",
     predefinedPersonaLibrary: "Predefined Persona Library",
-    bigFiveTraits: "Big Five Traits",
-    featureAnchors: "Feature Anchors (X-vector)",
+    featureAnchors: "Feature Anchors (X-vector) — Fixed by Persona",
     state: "State",
-    emotionalBaseline: "Emotional Baseline",
-    targetVariableY: "Target Variable Y",
-    emotionalBaselineCaption: "Ground-truth trait boundaries automatically balanced against emotional baseline selection.",
-    conversationEmotionalContext: "Conversation Emotional Context",
-    contextTooltip: "This represents the transient emotional tone of this specific interaction, which can act independently from the patient's long-term emotional baseline.",
+    simulationScale: "Simulation Scale (N)",
+    patientPersona: "Patient Persona",
+    psychologicalCondition: "Psychological Condition",
+    diseaseStage: "Disease Stage",
+    fatiguePattern: "Fatigue Pattern",
+    generateExperiment: "Generate Experiment",
+    generateNExperiments: "Generate {N} Experiments",
+    generatingStream: "Generating Stream...",
+    batchMode: "Batch mode: {N} synthetic dialogues will be generated per session",
     cognitiveFatigueLevel: "Cognitive Fatigue Level",
     hardwareSim: "Hardware Sim",
     aiPredictionDependency: "AI Prediction Dependency",
-    manualOverrideSuffix: "Manual Override",
     context: "Context",
     interlocutorType: "Interlocutor Type",
-    emotionalTriggers: "Emotional Triggers",
-    generateExperiment: "Generate Experiment",
-    generatingStream: "Generating Stream...",
+    conversationContext: "Conversation Context",
+    situationalVariables: "Situational Variables",
+    systemPromptPreview: "System Prompt Preview",
     clinicalAnalytics: "Longitudinal Clinical History Dashboard",
     groundTruth: "Ground Truth",
-    groundTruthCaption: "Ground Truth Model Targets — Multi-Label ML Inference Training Calibration",
+    groundTruthCaption: "Ground Truth Feature Anchors — Fixed Ranges from Persona Library (Multi-Label ML Calibration)",
     metricsTracker: "Metrics Tracker",
     totalTurns: "Total Turns",
     aiSelectionRatio: "AI Selection Ratio",
@@ -64,66 +153,43 @@ const translations = {
     exportData: "Export Data",
     exportSessionJSON: "Export Session Data (JSON)",
     exportMetricsCSV: "Export Metrics (CSV)",
-    voiceOutputSynthesized: "Voice Output Synthesized",
     suggestedViaVoxai: "Suggested via VoxAI",
     manualOverrideIntent: "Manual Override (High Intent)",
-    valueOutOfBounds: "Value must be 0.0–1.0",
-    conversationTimeline: "Conversation Timeline",
-    durationDays: "Duration (Days)",
-    mode: "Mode",
-    targetLength: "Target Length",
-    consecutiveDays: "Consecutive Days",
-    intermittentDays: "Intermittent Days",
-    short: "Short (5-10 turns)",
-    medium: "Medium (10-25 turns)",
-    long: "Long (25-50 turns)",
     insightsTitle: "VoxAI Clinical Insights & Flag Summary",
     flaggedRl: "message(s) flagged for model re-calibration. Review in training pipeline.",
     rlhfNotification: "Inference variance flagged by researcher. Token sequence and ground-truth variance queued for RLHF model re-calibration.",
-    rlhfQueued: "RLHF Queued",
     silenceNoOutput: "Cognitive fatigue threshold exceeded · No AAC output logged",
-    situationalVariables: "Situational Variables",
-    systemPromptPreview: "System Prompt Preview",
-    conversationContext: "Conversation Context",
     flagCurrentDialogueSlice: "Flag Current Dialogue Slice",
-    outOfDistribution: "Out-of-Distribution — Requires Human Review (RLHF)",
-    selectBaseline: {
-      Neutral: "Neutral",
-      Positive: "Positive",
-      Anxious: "Anxious",
-      "Mildly Depressed": "Mildly Depressed",
-      Depressed: "Depressed",
-      "Highly Motivated": "Highly Motivated",
-      Fatigued: "Fatigued",
-      "Emotionally Unstable": "Emotionally Unstable"
-    }
+    outOfDistribution: "Out-of-Distribution — Requires Human Review (RLHF)"
   },
   ES: {
     appTitle: "VoxAI",
-    appSubtitle: "Generador de Diálogo Sintético v3",
+    appSubtitle: "Generador de Diálogo Sintético v4",
     sessionActive: "Sesión Activa",
     simulationControls: "Controles de Simulación",
     predefinedPersonaLibrary: "Biblioteca de Perfiles Predefinidos",
-    bigFiveTraits: "Rasgos de los Cinco Grandes",
-    featureAnchors: "Vectores de Características (X)",
+    featureAnchors: "Anclas de Características (X-vector) — Fijadas por Perfil",
     state: "Estado",
-    emotionalBaseline: "Estado Emocional Base",
-    targetVariableY: "Variable Objetivo Y",
-    emotionalBaselineCaption: "Límites de rasgos automáticamente equilibrados contra la selección del estado emocional base.",
-    conversationEmotionalContext: "Contexto Emocional de Conversación",
-    contextTooltip: "Esto representa el tono emocional transitorio de esta interacción específica, que puede actuar de manera independiente del estado emocional a largo plazo del paciente.",
+    simulationScale: "Escala de Simulación",
+    patientPersona: "Perfil del Paciente",
+    psychologicalCondition: "Condición Psicológica",
+    diseaseStage: "Etapa de la Enfermedad",
+    fatiguePattern: "Patrón de Fatiga",
+    generateExperiment: "Generar Experimento",
+    generateNExperiments: "Generar {N} Experimentos",
+    generatingStream: "Generando Flujo...",
+    batchMode: "Modo masivo: {N} diálogos sintéticos por sesión",
     cognitiveFatigueLevel: "Nivel de Fatiga Cognitiva",
     hardwareSim: "Simulación de Hardware",
     aiPredictionDependency: "Dependencia de Predicción de IA",
-    manualOverrideSuffix: "Control Manual",
     context: "Contexto",
     interlocutorType: "Tipo de Interlocutor",
-    emotionalTriggers: "Desencadenantes Emocionales",
-    generateExperiment: "Generar Experimento",
-    generatingStream: "Generando Flujo...",
+    conversationContext: "Contexto de Conversación",
+    situationalVariables: "Variables Situacionales",
+    systemPromptPreview: "Vista Previa del Prompt",
     clinicalAnalytics: "Panel de Historial Clínico Longitudinal",
     groundTruth: "Datos de Referencia",
-    groundTruthCaption: "Objetivos del Modelo — Calibración de Inferencia ML Multietiqueta",
+    groundTruthCaption: "Anclas de Características Reales — Rangos Fijos (Calibración ML Multietiqueta)",
     metricsTracker: "Rastreador de Métricas",
     totalTurns: "Turnos Totales",
     aiSelectionRatio: "Proporción de Selección de IA",
@@ -132,39 +198,14 @@ const translations = {
     exportData: "Exportar Datos",
     exportSessionJSON: "Exportar Datos de Sesión (JSON)",
     exportMetricsCSV: "Exportar Métricas (CSV)",
-    voiceOutputSynthesized: "Voz Sintetizada",
     suggestedViaVoxai: "Sugerido por VoxAI",
     manualOverrideIntent: "Control Manual (Alta Intención)",
-    valueOutOfBounds: "El valor debe ser 0.0–1.0",
-    conversationTimeline: "Cronograma de Conversación",
-    durationDays: "Duración (Días)",
-    mode: "Modo",
-    targetLength: "Longitud Objetivo",
-    consecutiveDays: "Días Consecutivos",
-    intermittentDays: "Días Intermitentes",
-    short: "Corto (5-10 turnos)",
-    medium: "Medio (10-25 turnos)",
-    long: "Largo (25-50 turnos)",
     insightsTitle: "Perspectivas Clínicas de VoxAI y Resumen de Alertas",
     flaggedRl: "mensaje(s) marcados para recalibración del modelo. Revisar en la tubería de entrenamiento.",
-    rlhfNotification: "Varianza de inferencia marcada por investigador. Secuencia de tokens y varianza base en cola para recalibración de modelo RLHF.",
-    rlhfQueued: "RLHF en Cola",
+    rlhfNotification: "Varianza de inferencia marcada por investigador. Secuencia de tokens en cola para recalibración de modelo RLHF.",
     silenceNoOutput: "Umbral de fatiga cognitiva excedido · Sin registro de salida AAC",
-    situationalVariables: "Variables Situacionales",
-    systemPromptPreview: "Vista Previa del Prompt",
-    conversationContext: "Contexto de Conversación",
     flagCurrentDialogueSlice: "Marcar Fragmento de Diálogo",
-    outOfDistribution: "Fuera de Distribución — Requiere Revisión Humana",
-    selectBaseline: {
-      Neutral: "Neutral",
-      Positive: "Positivo",
-      Anxious: "Ansioso",
-      "Mildly Depressed": "Ligeramente Deprimido",
-      Depressed: "Deprimido",
-      "Highly Motivated": "Altamente Motivado",
-      Fatigued: "Fatigado",
-      "Emotionally Unstable": "Emocionalmente Inestable"
-    }
+    outOfDistribution: "Fuera de Distribución — Requiere Revisión Humana"
   }
 };
 
@@ -220,42 +261,71 @@ export function Dashboard() {
     rlhfText: "#fef3c7",
   };
 
-  const [openness, setOpenness] = useState(0.65);
-  const [conscientiousness, setConscientiousness] = useState(0.5);
-  const [extraversion, setExtraversion] = useState(0.40);
-  const [agreeableness, setAgreeableness] = useState(0.5);
-  const [neuroticism, setNeuroticism] = useState(0.80);
-
-  const [emotionalBaseline, setEmotionalBaseline] = useState("Anxious");
-  
-  const [interlocutor, setInterlocutor] = useState<typeof INTERLOCUTORS[number]>('doctor');
-  const [conversationContext, setConversationContext] = useState<typeof CONVERSATION_CONTEXTS[number]>('daily_chat');
-  const [situationalVariable, setSituationalVariable] = useState<typeof SITUATIONAL_VARIABLES[number] | null>('morning_rested');
-  const [slicesFlagged, setSlicesFlagged] = useState(0);
+  const [simulationN, setSimulationN] = useState(1);
+  const [selectedPersonaId, setSelectedPersonaId] = useState("anxious_low_energy");
+  const [interlocutor, setInterlocutor] = useState('doctor');
+  const [conversationContext, setConversationContext] = useState('daily_chat');
+  const [situationalVariable, setSituationalVariable] = useState<string | null>('morning_routine');
   
   const [fatigue, setFatigue] = useState(52);
+  const [emotionalBaseline, setEmotionalBaseline] = useState("nervous");
   const [emotionalValence, setEmotionalValence] = useState(0.62);
   const [dependency, setDependency] = useState(70);
-  const [triggers, setTriggers] = useState({
-    "Physical Pain": false,
-    "Existential Anxiety": true,
-    "Social Isolation": false,
-    "Cognitive Overload": true,
-  });
-
-  const [timelineDuration, setTimelineDuration] = useState(3);
-  const [timelineMode, setTimelineMode] = useState("Consecutive Days");
-  const [timelineTarget, setTimelineTarget] = useState("Medium (10-25 turns)");
+  const [slicesFlagged, setSlicesFlagged] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [isPromptOpen, setIsPromptOpen] = useState(false);
   
   const [flaggedMessages, setFlaggedMessages] = useState<Set<number>>(new Set());
   const [showRlhfNotification, setShowRlhfNotification] = useState(false);
-  
   const [isInsightsOpen, setIsInsightsOpen] = useState(true);
+
+  const selectedPersona = SCENARIO_LIBRARY.patientPersonas.find(p => p.id === selectedPersonaId)!;
+  const selectedInterlocutor = SCENARIO_LIBRARY.interlocutors.find(i => i.id === interlocutor)!;
+  const selectedContext = SCENARIO_LIBRARY.conversationContexts.find(c => c.id === conversationContext)!;
+  const selectedSituational = situationalVariable ? SCENARIO_LIBRARY.situationalVariables.find(s => s.id === situationalVariable) : null;
+
+  const traitValues = useMemo(() => ({
+    O: sampleMidpoint(selectedPersona.personality.O),
+    C: sampleMidpoint(selectedPersona.personality.C),
+    E: sampleMidpoint(selectedPersona.personality.E),
+    A: sampleMidpoint(selectedPersona.personality.A),
+    N: sampleMidpoint(selectedPersona.personality.N),
+  }), [selectedPersona]);
+
+  useEffect(() => {
+    setEmotionalBaseline(selectedPersona.baselineMood);
+  }, [selectedPersona.id]);
+
+  useEffect(() => {
+    if (!selectedSituational) return;
+    switch (selectedSituational.id) {
+      case 'evening_fatigue':
+        setFatigue(80);
+        setEmotionalBaseline('Fatigued');
+        break;
+      case 'after_bad_news':
+        setEmotionalBaseline('Anxious');
+        break;
+      case 'motor_loss_event':
+        setEmotionalBaseline('Anxious');
+        break;
+      case 'morning_routine':
+        setFatigue(15);
+        setEmotionalBaseline('Neutral');
+        break;
+      case 'post_medication':
+        setFatigue(50);
+        break;
+      case 'unexpected_good_day':
+        setEmotionalBaseline('Positive');
+        break;
+      case 'device_issue':
+        setEmotionalBaseline('Anxious');
+        break;
+    }
+  }, [selectedSituational]);
 
   const handleFlagMessage = (id: number) => {
     setFlaggedMessages(prev => {
@@ -284,7 +354,7 @@ export function Dashboard() {
   const formatTime = (ts: MessageTimestamp) => {
     return `Day ${ts.day} · ${ts.hour.toString().padStart(2, '0')}:${ts.minute.toString().padStart(2, '0')}`;
   };
-  
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -352,97 +422,27 @@ export function Dashboard() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    switch (emotionalBaseline) {
-      case "Depressed":
-        setExtraversion(0.15); setOpenness(0.20); setNeuroticism(0.85);
-        break;
-      case "Anxious":
-        setNeuroticism(0.80); setExtraversion(0.30);
-        break;
-      case "Highly Motivated":
-        setConscientiousness(0.85); setOpenness(0.75);
-        break;
-      case "Positive":
-        setExtraversion(0.70); setNeuroticism(0.20);
-        break;
-      case "Fatigued":
-        setExtraversion(0.20); setConscientiousness(0.30);
-        break;
-      case "Emotionally Unstable":
-        setNeuroticism(0.90); setAgreeableness(0.25);
-        break;
-      default:
-        break;
-    }
-  }, [emotionalBaseline]);
-
-  useEffect(() => {
-    if (!situationalVariable) return;
-    switch (situationalVariable) {
-      case 'evening_exhausted':
-        setFatigue(80);
-        setEmotionalBaseline('Fatigued');
-        break;
-      case 'post_therapy_fatigue':
-        setFatigue(65);
-        break;
-      case 'after_bad_medical_news':
-        setNeuroticism(0.90);
-        setEmotionalBaseline('Anxious');
-        break;
-      case 'physical_discomfort_trigger':
-        setNeuroticism(0.75);
-        setExtraversion(0.20);
-        break;
-      case 'social_isolation_state':
-        setExtraversion(0.10);
-        setAgreeableness(0.30);
-        break;
-      case 'morning_rested':
-        setFatigue(15);
-        break;
-      case 'routine_comfort':
-        setNeuroticism(0.30);
-        setEmotionalBaseline('Neutral');
-        break;
-    }
-  }, [situationalVariable]);
-
   const systemPrompt = useMemo(() => {
-    const activeTriggers = Object.entries(triggers)
-      .filter(([_, isActive]) => isActive)
-      .map(([name]) => name)
-      .join(", ");
-    
-    let delta = 0;
-    switch (conversationContext) {
-      case 'emotional_support': delta = 0.15; break;
-      case 'daily_chat': delta = 0.10; break;
-      case 'routine_update': delta = -0.05; break;
-      case 'medical_consultation': delta = -0.10; break;
-      case 'symptom_reporting': delta = -0.15; break;
-      case 'functional_decline': delta = -0.20; break;
-      case 'aac_frustration': delta = -0.25; break;
-      case 'care_planning': delta = 0; break;
-    }
-
-    return `[SYSTEM PROMPT — SDG v3.1]
-INTERLOCUTOR: ${interlocutor}
-CONVERSATION_CONTEXT: ${conversationContext}
-SITUATIONAL_VARIABLE: ${situationalVariable || 'None'}
-EMOTIONAL_BASELINE (Y-target): ${emotionalBaseline}
-COGNITIVE_FATIGUE: ${fatigue / 100}
-FEATURE_ANCHORS:
-  O=${openness.toFixed(2)} C=${conscientiousness.toFixed(2)} E=${extraversion.toFixed(2)} A=${agreeableness.toFixed(2)} N=${neuroticism.toFixed(2)}
-BIG5_TRIGGERS: ${activeTriggers || 'None'}
-DYADIC_SENTIMENT_DELTA: ${delta}
-CONVERSATION_EMOTIONAL_CONTEXT: ${conversationContext}
-TIMELINE: Day ${messages[messages.length - 1]?.timestamp.day || 1}, Duration: ${timelineDuration} days, Mode: ${timelineMode}
+    return `[SYSTEM PROMPT — SDG v4.0]
+PATIENT_PERSONA_ID: ${selectedPersonaId}
+FEATURE_ANCHORS (fixed): O=${traitValues.O} C=${traitValues.C} E=${traitValues.E} A=${traitValues.A} N=${traitValues.N}
+PSYCHOLOGICAL_CONDITION: ${selectedPersona.psychologicalCondition}
+BASELINE_MOOD (Y-target): ${emotionalBaseline}
+DISEASE_STAGE: ${selectedPersona.diseaseStage.stage} | MOTOR: ${selectedPersona.diseaseStage.motorFunction}
+COMMUNICATION_ABILITY: ${selectedPersona.diseaseStage.communicationAbility}
+FATIGUE_PATTERN: ${selectedPersona.cognitiveFatiguePattern.trend} · ${selectedPersona.cognitiveFatiguePattern.intensity}
 ---
-Inject above parameters into synthetic dialogue generation context window.
-Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.2/day.`;
-  }, [interlocutor, conversationContext, situationalVariable, emotionalBaseline, fatigue, openness, conscientiousness, extraversion, agreeableness, neuroticism, triggers, messages, timelineDuration, timelineMode]);
+INTERLOCUTOR: ${interlocutor} | STYLE: ${selectedInterlocutor.communicationStyle} | EMPATHY: ${selectedInterlocutor.empathyLevel}
+CONVERSATION_CONTEXT: ${conversationContext} | TONE: ${selectedContext.tone}
+SITUATIONAL_VARIABLE: ${situationalVariable || 'None'} | TIME_OF_DAY: ${selectedSituational?.timeOfDay || 'N/A'}
+EMOTIONAL_TRIGGERS: [${selectedSituational?.emotionalTriggers.join(', ') || ''}]
+COGNITIVE_FATIGUE: ${(fatigue/100).toFixed(2)}
+SIMULATION_SCALE: N=${simulationN}
+---
+Enforce OCEAN anchors as fixed priors. Y-target (baselineMood) may drift ±0.2/day.
+Apply interlocutor empathy level as conversation warmth modifier.
+Situational triggers cascade into emotional state before each turn generation.`;
+  }, [selectedPersonaId, traitValues, selectedPersona, emotionalBaseline, interlocutor, selectedInterlocutor, conversationContext, selectedContext, situationalVariable, selectedSituational, fatigue, simulationN]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -456,25 +456,13 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
     if (isGenerating) return;
     setIsGenerating(true);
     
-    let delta = 0;
-    switch (conversationContext) {
-      case 'emotional_support': delta = 0.15; break;
-      case 'daily_chat': delta = 0.10; break;
-      case 'routine_update': delta = -0.05; break;
-      case 'medical_consultation': delta = -0.10; break;
-      case 'symptom_reporting': delta = -0.15; break;
-      case 'functional_decline': delta = -0.20; break;
-      case 'aac_frustration': delta = -0.25; break;
-      case 'care_planning': delta = 0; break;
-    }
-    
     setTimeout(() => {
       setIsGenerating(false);
       
       const newFatigue1 = Math.min(100, fatigue + Math.floor(Math.random() * 10));
       const newFatigue2 = Math.min(100, newFatigue1 + Math.floor(Math.random() * 15));
       
-      let newEmotional1 = Math.max(0, Math.min(1.0, metrics.emotionalHistory[metrics.emotionalHistory.length-1] + delta + (Math.random() * 0.05 - 0.025)));
+      let newEmotional1 = Math.max(0, Math.min(1.0, metrics.emotionalHistory[metrics.emotionalHistory.length-1] + (Math.random() * 0.05 - 0.025)));
       let newEmotional2 = Math.max(0, Math.min(1.0, newEmotional1 + (Math.random() * 0.05 - 0.025)));
 
       const lastMsg = messages[messages.length - 1];
@@ -531,36 +519,6 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
     }, 2500);
   };
 
-  const handleTriggerToggle = (trigger: string) => {
-    setTriggers(prev => ({ ...prev, [trigger]: !prev[trigger as keyof typeof triggers] }));
-  };
-
-  const TraitInput = ({ label, value, onChange }: any) => {
-    const isError = value < 0 || value > 1;
-    return (
-      <div className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: colors.border }}>
-        <span className="text-sm font-medium" style={{ color: colors.text }}>{label}</span>
-        <div className="flex items-center gap-2">
-          {isError && <span className="text-xs text-red-500">{t.valueOutOfBounds}</span>}
-          <input
-            type="number"
-            min="0"
-            max="1"
-            step="0.01"
-            value={value}
-            onChange={(e) => onChange(parseFloat(e.target.value))}
-            className="w-20 px-2 py-1 text-right text-sm border rounded min-h-[44px] focus:outline-none"
-            style={{ 
-              backgroundColor: colors.bg, 
-              color: colors.text, 
-              borderColor: isError ? 'red' : colors.border 
-            }}
-          />
-        </div>
-      </div>
-    );
-  };
-
   const AreaChart = ({ data, color, yLabels, yMax = 100, drawSilence = true }: { data: number[], color: string, yLabels: string[], yMax?: number, drawSilence?: boolean }) => {
     if (data.length === 0) return null;
     const width = 300;
@@ -579,37 +537,23 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
     return (
       <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height + 15}`} preserveAspectRatio="none" className="overflow-visible mt-2">
         <polygon points={areaPoints} fill={`url(#gradient-${color.replace('#', '')})`} />
-        
         <defs>
           <linearGradient id={`gradient-${color.replace('#', '')}`} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity="0.4" />
             <stop offset="100%" stopColor={color} stopOpacity="0.05" />
           </linearGradient>
         </defs>
-
         {drawSilence && (
           <g>
             <line x1={silenceX} y1="0" x2={silenceX} y2={height} stroke={colors.secondary} strokeWidth="1" strokeDasharray="4" />
             <text x={silenceX + 5} y="15" fontSize="8" fill={colors.secondary} opacity="0.8">Silence Period</text>
           </g>
         )}
-
-        <polyline
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          points={points}
-        />
-        
+        <polyline fill="none" stroke={color} strokeWidth="2" points={points} />
         <text x="-5" y="10" fontSize="10" fill={colors.secondary} textAnchor="end">{yLabels[0]}</text>
         <text x="-5" y={height/2 + 3} fontSize="10" fill={colors.secondary} textAnchor="end">{yLabels[1]}</text>
         <text x="-5" y={height} fontSize="10" fill={colors.secondary} textAnchor="end">{yLabels[2]}</text>
-        
         <line x1="0" y1={height} x2={width} y2={height} stroke={colors.border} strokeWidth="1" />
-        
-        <text x="10" y={height + 12} fontSize="10" fill={colors.secondary}>D1</text>
-        <text x={width/2} y={height + 12} fontSize="10" fill={colors.secondary} textAnchor="middle">D2</text>
-        <text x={width - 10} y={height + 12} fontSize="10" fill={colors.secondary} textAnchor="end">D3</text>
       </svg>
     );
   };
@@ -635,38 +579,35 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
             <line x1={silenceX} y1="0" x2={silenceX} y2={height} stroke={colors.secondary} strokeWidth="1" strokeDasharray="4" />
           </g>
         )}
-        
-        <polyline
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          points={points}
-        />
-        
+        <polyline fill="none" stroke={color} strokeWidth="2" points={points} />
         <text x="-5" y="10" fontSize="10" fill={colors.secondary} textAnchor="end">{yLabels[0]}</text>
         <text x="-5" y={height/2 + 3} fontSize="10" fill={colors.secondary} textAnchor="end">{yLabels[1]}</text>
         <text x="-5" y={height} fontSize="10" fill={colors.secondary} textAnchor="end">{yLabels[2]}</text>
-        
         <line x1="0" y1={height/2} x2={width} y2={height/2} stroke={colors.border} strokeWidth="1" strokeDasharray="4" />
-        
         <line x1="0" y1={height} x2={width} y2={height} stroke={colors.border} strokeWidth="1" />
-        
-        <text x="10" y={height + 12} fontSize="10" fill={colors.secondary}>D1</text>
-        <text x={width/2} y={height + 12} fontSize="10" fill={colors.secondary} textAnchor="middle">D2</text>
-        <text x={width - 10} y={height + 12} fontSize="10" fill={colors.secondary} textAnchor="end">D3</text>
       </svg>
     );
   };
 
-  const HorizontalBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
-    <div className="flex items-center gap-3 text-sm">
-      <span className="w-4 font-bold" style={{ color: colors.secondary }}>{label}</span>
-      <div className="flex-1 h-3 rounded-full overflow-hidden bg-opacity-20" style={{ backgroundColor: colors.border }}>
-        <div className="h-full rounded-full transition-all" style={{ width: `${value * 100}%`, backgroundColor: color }} />
+  const RangeBar = ({ label, range, color }: { label: string, range: readonly [number, number], color: string }) => {
+    const min = range[0];
+    const max = range[1];
+    const mid = sampleMidpoint(range);
+    const leftStr = (min * 100).toFixed(1) + '%';
+    const widthStr = ((max - min) * 100).toFixed(1) + '%';
+    const bgTinted = color + '50';
+    const midLeft = 'calc(' + (mid * 100).toFixed(1) + '% - 2px)';
+    return (
+      <div className="flex items-center gap-3 text-sm">
+        <span className="w-4 font-bold" style={{ color: colors.secondary }}>{label}</span>
+        <div className="flex-1 h-3 rounded-full overflow-hidden bg-opacity-20 relative" style={{ backgroundColor: colors.border }}>
+          <div className="absolute h-full rounded-full transition-all" style={{ left: leftStr, width: widthStr, backgroundColor: bgTinted }} />
+          <div className="absolute h-full w-1 rounded-full transition-all" style={{ left: midLeft, backgroundColor: color }} />
+        </div>
+        <span className="w-20 text-right font-mono text-xs" style={{ color: colors.text }}>[{min.toFixed(2)}, {max.toFixed(2)}]</span>
       </div>
-      <span className="w-8 text-right font-mono text-xs" style={{ color: colors.text }}>{value.toFixed(2)}</span>
-    </div>
-  );
+    );
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: 'system-ui, -apple-system, sans-serif' }} className="flex flex-col overflow-hidden relative">
@@ -716,77 +657,129 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
         {/* LEFT PANEL */}
         <section className="col-span-1 border-r flex flex-col h-[calc(100vh-4rem)] overflow-y-auto" style={{ borderColor: colors.border, backgroundColor: colors.cardBg }}>
           <div className="p-5 flex-1">
-            <h2 className="font-bold text-sm flex items-center gap-2 mb-6" style={{ color: colors.heading }}>
-              <Settings className="w-4 h-4" style={{ color: colors.primary }} />
-              {t.simulationControls}
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-bold text-sm flex items-center gap-2" style={{ color: colors.heading }}>
+                <Settings className="w-4 h-4" style={{ color: colors.primary }} />
+                {t.simulationControls}
+              </h2>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="text-xs flex items-center gap-1 hover:underline"
+                style={{ color: colors.primary }}
+              >
+                <Database className="w-3 h-3" />
+                {t.predefinedPersonaLibrary}
+              </button>
+            </div>
 
-            {/* State Section */}
+            {/* Simulation Scale */}
+            <div className="mb-6">
+              <label className="text-xs font-semibold mb-2 block" style={{ color: colors.secondary }}>
+                {t.simulationScale}
+              </label>
+              <div className="flex gap-2 mb-2">
+                {[1, 10, 100, 1000].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setSimulationN(n)}
+                    className="flex-1 py-1.5 text-xs font-medium rounded transition-all"
+                    style={{
+                      backgroundColor: simulationN === n ? colors.primary : colors.bg,
+                      color: simulationN === n ? '#ffffff' : colors.text,
+                      border: `1px solid ${simulationN === n ? colors.primary : colors.border}`
+                    }}
+                  >
+                    N={n}
+                  </button>
+                ))}
+                <input
+                  type="number"
+                  min="1"
+                  max="1000"
+                  value={simulationN}
+                  onChange={(e) => setSimulationN(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-16 px-2 text-xs text-right border rounded focus:outline-none"
+                  style={{ backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }}
+                />
+              </div>
+              {simulationN > 1 && (
+                <div className="text-[10px] px-2 py-1 rounded" style={{ backgroundColor: `${colors.secondary}15`, color: colors.secondary }}>
+                  {t.batchMode.replace('{N}', simulationN.toString())}
+                </div>
+              )}
+            </div>
+
+            {/* Persona Selector */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4 border-b pb-2" style={{ borderColor: colors.border }}>
-                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: colors.heading }}>{t.state}</h3>
-                <button 
-                  onClick={() => setIsModalOpen(true)}
-                  className="text-xs flex items-center gap-1 hover:underline"
-                  style={{ color: colors.primary }}
-                >
-                  <Database className="w-3 h-3" />
-                  {t.predefinedPersonaLibrary}
-                </button>
+                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: colors.heading }}>{t.patientPersona}</h3>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-semibold mb-2 block" style={{ color: colors.secondary }}>
-                    {t.emotionalBaseline} ({t.targetVariableY})
-                  </label>
-                  <select 
-                    className="w-full p-2 text-sm border rounded min-h-[44px] focus:outline-none"
-                    style={{ backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }}
-                    value={emotionalBaseline}
-                    onChange={(e) => setEmotionalBaseline(e.target.value)}
-                  >
-                    {Object.entries(t.selectBaseline).map(([key, value]) => (
-                      <option key={key} value={key}>{value}</option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] mt-2 opacity-80" style={{ color: colors.secondary }}>
-                    {t.emotionalBaselineCaption}
-                  </p>
-                </div>
+              <div className="space-y-2 mb-4">
+                {SCENARIO_LIBRARY.patientPersonas.map((p) => {
+                  const isSelected = selectedPersonaId === p.id;
+                  let dotColor = "#10b981";
+                  if (p.cognitiveFatiguePattern.intensity === "medium") dotColor = "#f59e0b";
+                  if (p.cognitiveFatiguePattern.intensity === "high") dotColor = "#f97316";
+                  if (p.cognitiveFatiguePattern.intensity === "very_high") dotColor = "#ef4444";
+                  
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setSelectedPersonaId(p.id)}
+                      className="w-full text-left p-3 rounded transition-all border"
+                      style={{
+                        backgroundColor: isSelected ? `${colors.primary}15` : colors.bg,
+                        borderColor: isSelected ? colors.primary : colors.border
+                      }}
+                    >
+                      <div className="font-semibold text-sm mb-1" style={{ color: isSelected ? colors.primary : colors.text }}>
+                        {toLabel(p.id)}
+                      </div>
+                      <p className="text-[10px] mb-2 leading-tight opacity-80" style={{ color: colors.text }}>
+                        {p.description}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[9px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider" style={{ borderColor: colors.border, color: colors.secondary, backgroundColor: colors.cardBg }}>
+                          {toLabel(p.diseaseStage.stage)} Stage
+                        </span>
+                        <span className="text-[9px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider" style={{ borderColor: colors.border, color: colors.secondary, backgroundColor: colors.cardBg }}>
+                          {toLabel(p.diseaseStage.communicationAbility)}
+                        </span>
+                        <div className="flex items-center gap-1 ml-auto">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColor }}></div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-                <div className="pt-4 border-t" style={{ borderColor: colors.border }}>
-                  <label className="text-xs font-semibold mb-3 flex items-center justify-between" style={{ color: colors.secondary }}>
-                    {t.featureAnchors}
-                    <Brain className="w-3 h-3" />
-                  </label>
-                  <div className="space-y-1">
-                    <TraitInput label="Openness (O)" value={openness} onChange={setOpenness} />
-                    <TraitInput label="Conscientiousness (C)" value={conscientiousness} onChange={setConscientiousness} />
-                    <TraitInput label="Extraversion (E)" value={extraversion} onChange={setExtraversion} />
-                    <TraitInput label="Agreeableness (A)" value={agreeableness} onChange={setAgreeableness} />
-                    <TraitInput label="Neuroticism (N)" value={neuroticism} onChange={setNeuroticism} />
-                  </div>
+              {/* Persona Info Block */}
+              <div className="p-3 rounded border text-xs space-y-1.5" style={{ backgroundColor: colors.bg, borderColor: colors.border, color: colors.text }}>
+                <div><span style={{ color: colors.secondary }}>{t.psychologicalCondition}:</span> {toLabel(selectedPersona.psychologicalCondition)}</div>
+                <div><span style={{ color: colors.secondary }}>Baseline Mood:</span> {toLabel(emotionalBaseline)}</div>
+                <div><span style={{ color: colors.secondary }}>{t.diseaseStage}:</span> {toLabel(selectedPersona.diseaseStage.stage)} | Motor: {toLabel(selectedPersona.diseaseStage.motorFunction)}</div>
+                <div><span style={{ color: colors.secondary }}>Communication:</span> {toLabel(selectedPersona.diseaseStage.communicationAbility)}</div>
+                <div><span style={{ color: colors.secondary }}>{t.fatiguePattern}:</span> {toLabel(selectedPersona.cognitiveFatiguePattern.trend)} · {toLabel(selectedPersona.cognitiveFatiguePattern.intensity)}</div>
+                <div className="mt-2 pt-2 border-t text-[10px] text-center italic" style={{ borderColor: colors.border, color: colors.secondary }}>
+                  {t.featureAnchors}
                 </div>
+              </div>
 
-                <div className="pt-4 border-t" style={{ borderColor: colors.border }}>
-                  <label className="text-xs font-semibold mb-2 flex items-center justify-between" style={{ color: colors.secondary }}>
-                    {t.cognitiveFatigueLevel}
-                    <span className="font-mono">{fatigue}%</span>
-                  </label>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    value={fatigue} 
-                    onChange={(e) => setFatigue(parseInt(e.target.value))}
-                    className="w-full accent-primary"
-                  />
-                  <div className="flex justify-between text-[10px] mt-1 font-mono uppercase" style={{ color: colors.secondary }}>
-                    <span>Optimal</span>
-                    <span>Critical</span>
-                  </div>
-                </div>
+              <div className="mt-4">
+                <label className="text-xs font-semibold mb-2 flex items-center justify-between" style={{ color: colors.secondary }}>
+                  {t.cognitiveFatigueLevel}
+                  <span className="font-mono">{fatigue}%</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="100" 
+                  value={fatigue} 
+                  onChange={(e) => setFatigue(parseInt(e.target.value))}
+                  className="w-full accent-primary"
+                />
               </div>
             </div>
 
@@ -799,22 +792,26 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
                   <label className="text-xs font-semibold mb-2 block" style={{ color: colors.secondary }}>
                     {t.interlocutorType}
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {INTERLOCUTORS.map((type) => (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {SCENARIO_LIBRARY.interlocutors.map((i) => (
                       <button
-                        key={type}
-                        onClick={() => setInterlocutor(type)}
+                        key={i.id}
+                        onClick={() => setInterlocutor(i.id)}
                         className="px-4 py-2 text-sm font-medium rounded-full min-h-[44px] transition-all"
                         style={{
-                          backgroundColor: interlocutor === type ? colors.primary : colors.bg,
-                          color: interlocutor === type ? '#ffffff' : colors.secondary,
-                          border: `1px solid ${interlocutor === type ? colors.primary : colors.border}`,
-                          boxShadow: interlocutor === type ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+                          backgroundColor: interlocutor === i.id ? colors.primary : colors.bg,
+                          color: interlocutor === i.id ? '#ffffff' : colors.secondary,
+                          border: `1px solid ${interlocutor === i.id ? colors.primary : colors.border}`,
+                          boxShadow: interlocutor === i.id ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
                         }}
                       >
-                        {toLabel(type)}
+                        {i.role}
                       </button>
                     ))}
+                  </div>
+                  <div className="text-[10px] flex gap-4 uppercase font-medium" style={{ color: colors.secondary }}>
+                    <span>Style: {toLabel(selectedInterlocutor.communicationStyle)}</span>
+                    <span>Empathy: {toLabel(selectedInterlocutor.empathyLevel)}</span>
                   </div>
                 </div>
 
@@ -822,21 +819,24 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
                   <label className="text-xs font-semibold mb-2 block" style={{ color: colors.secondary }}>
                     {t.conversationContext}
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {CONVERSATION_CONTEXTS.map((ctx) => (
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    {SCENARIO_LIBRARY.conversationContexts.map((ctx) => (
                       <button
-                        key={ctx}
-                        onClick={() => setConversationContext(ctx)}
-                        className="px-2 py-2 text-sm rounded min-h-[44px] text-center transition-all"
+                        key={ctx.id}
+                        onClick={() => setConversationContext(ctx.id)}
+                        className="px-2 py-2 text-[11px] rounded min-h-[44px] text-center transition-all leading-tight flex items-center justify-center"
                         style={{
-                          backgroundColor: conversationContext === ctx ? `${colors.primary}15` : colors.bg,
-                          color: conversationContext === ctx ? colors.primary : colors.secondary,
-                          border: `1px solid ${conversationContext === ctx ? colors.primary : colors.border}`,
+                          backgroundColor: conversationContext === ctx.id ? `${colors.primary}15` : colors.bg,
+                          color: conversationContext === ctx.id ? colors.primary : colors.text,
+                          border: `1px solid ${conversationContext === ctx.id ? colors.primary : colors.border}`,
                         }}
                       >
-                        {toLabel(ctx)}
+                        {toLabel(ctx.id)}
                       </button>
                     ))}
+                  </div>
+                  <div className="text-[10px]" style={{ color: colors.secondary }}>
+                    Tone: <span className="font-semibold">{toLabel(selectedContext.tone)}</span> · {selectedContext.description}
                   </div>
                 </div>
               </div>
@@ -846,25 +846,35 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
             <div className="mb-8">
               <h3 className="text-xs font-bold uppercase tracking-widest mb-4 border-b pb-2" style={{ color: colors.heading, borderColor: colors.border }}>{t.situationalVariables}</h3>
               <div className="space-y-2">
-                {SITUATIONAL_VARIABLES.map((v) => (
+                {SCENARIO_LIBRARY.situationalVariables.map((v) => (
                   <button
-                    key={v}
-                    onClick={() => setSituationalVariable(situationalVariable === v ? null : v)}
-                    className="w-full flex items-center justify-start px-3 py-2 text-sm rounded min-h-[44px] transition-all text-left"
+                    key={v.id}
+                    onClick={() => setSituationalVariable(situationalVariable === v.id ? null : v.id)}
+                    className="w-full flex flex-col justify-start p-3 text-sm rounded min-h-[44px] transition-all text-left"
                     style={{
-                      backgroundColor: situationalVariable === v ? `${colors.primary}15` : colors.bg,
-                      color: situationalVariable === v ? colors.primary : colors.text,
-                      border: `1px solid ${situationalVariable === v ? colors.primary : colors.border}`,
+                      backgroundColor: situationalVariable === v.id ? `${colors.primary}15` : colors.bg,
+                      color: situationalVariable === v.id ? colors.primary : colors.text,
+                      border: `1px solid ${situationalVariable === v.id ? colors.primary : colors.border}`,
                     }}
                   >
-                    <div className="w-4 h-4 rounded-full border mr-3 flex items-center justify-center shrink-0"
-                      style={{ 
-                        borderColor: situationalVariable === v ? colors.primary : colors.secondary,
-                        backgroundColor: situationalVariable === v ? colors.primary : 'transparent'
-                      }}>
-                      {situationalVariable === v && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                    <div className="flex items-center w-full mb-1">
+                      <div className="w-4 h-4 rounded-full border mr-3 flex items-center justify-center shrink-0"
+                        style={{ 
+                          borderColor: situationalVariable === v.id ? colors.primary : colors.secondary,
+                          backgroundColor: situationalVariable === v.id ? colors.primary : 'transparent'
+                        }}>
+                        {situationalVariable === v.id && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                      </div>
+                      <span className="font-medium">{toLabel(v.id)}</span>
                     </div>
-                    {toLabel(v)}
+                    {situationalVariable === v.id && (
+                      <div className="pl-7 flex flex-wrap gap-1 mt-1">
+                        <span className="text-[9px] px-1 rounded uppercase bg-black/10" style={{ color: colors.secondary }}>{v.timeOfDay}</span>
+                        {v.emotionalTriggers.map(t => (
+                          <span key={t} className="text-[9px] px-1 rounded uppercase bg-black/10" style={{ color: colors.secondary }}>{t}</span>
+                        ))}
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -913,7 +923,7 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
                 ) : (
                   <>
                     <Play className="w-4 h-4 fill-current" />
-                    {t.generateExperiment}
+                    {simulationN > 1 ? t.generateNExperiments.replace('{N}', simulationN.toString()) : t.generateExperiment}
                   </>
                 )}
               </button>
@@ -1087,11 +1097,11 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
               <h3 className="text-xs font-bold uppercase tracking-widest mb-2 border-b pb-2" style={{ color: colors.heading, borderColor: colors.border }}>{t.groundTruth}</h3>
               <p className="text-xs mb-4" style={{ color: colors.secondary }}>{t.groundTruthCaption}</p>
               <div className="space-y-3">
-                <HorizontalBar label="O" value={openness} color={colors.primary} />
-                <HorizontalBar label="C" value={conscientiousness} color={colors.primary} />
-                <HorizontalBar label="E" value={extraversion} color={colors.primary} />
-                <HorizontalBar label="A" value={agreeableness} color={colors.primary} />
-                <HorizontalBar label="N" value={neuroticism} color={colors.primary} />
+                <RangeBar label="O" range={selectedPersona.personality.O} color={colors.primary} />
+                <RangeBar label="C" range={selectedPersona.personality.C} color={colors.primary} />
+                <RangeBar label="E" range={selectedPersona.personality.E} color={colors.primary} />
+                <RangeBar label="A" range={selectedPersona.personality.A} color={colors.primary} />
+                <RangeBar label="N" range={selectedPersona.personality.N} color={colors.primary} />
               </div>
             </div>
 
@@ -1110,8 +1120,8 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
                     <span className="text-xl font-mono" style={{ color: colors.heading }}>{metrics.aiRatio}%</span>
                   </div>
                   <div className="h-2 w-full rounded-full overflow-hidden flex" style={{ backgroundColor: colors.border }}>
-                    <div className="h-full transition-all" style={{ width: `${metrics.aiRatio}%`, backgroundColor: colors.aiAccent }}></div>
-                    <div className="h-full transition-all" style={{ width: `${100 - metrics.aiRatio}%`, backgroundColor: colors.overrideAccent }}></div>
+                    <div className="h-full transition-all" style={{ width: metrics.aiRatio + '%', backgroundColor: colors.aiAccent }}></div>
+                    <div className="h-full transition-all" style={{ width: (100 - metrics.aiRatio) + '%', backgroundColor: colors.overrideAccent }}></div>
                   </div>
                   <div className="flex justify-between mt-2 text-[10px] uppercase font-bold" style={{ color: colors.secondary }}>
                     <span style={{ color: colors.aiAccent }}>AI</span>
@@ -1180,17 +1190,65 @@ Enforce OCEAN feature anchors as stable priors. Allow Y-target drift within ±0.
               <div className="space-y-3">
                 <button className="w-full min-h-[44px] flex items-center justify-center gap-2 border rounded text-sm font-medium transition-colors" style={{ backgroundColor: colors.bg, borderColor: colors.border, color: colors.text }}>
                   <Download className="w-4 h-4" />
-                  {t.exportSessionJSON}
+                  {t.exportSessionJSON} {simulationN > 1 && `(N=${simulationN})`}
                 </button>
                 <button className="w-full min-h-[44px] flex items-center justify-center gap-2 border rounded text-sm font-medium transition-colors" style={{ backgroundColor: colors.bg, borderColor: colors.border, color: colors.text }}>
                   <Download className="w-4 h-4" />
-                  {t.exportMetricsCSV}
+                  {t.exportMetricsCSV} {simulationN > 1 && `(N=${simulationN})`}
                 </button>
               </div>
             </div>
           </div>
         </section>
       </main>
+
+      {/* Predefined Persona Library Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-4xl rounded-lg flex flex-col max-h-[85vh] shadow-2xl" style={{ backgroundColor: colors.cardBg, border: `1px solid ${colors.border}` }}>
+            <div className="flex items-center justify-between p-4 border-b shrink-0" style={{ borderColor: colors.border }}>
+              <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: colors.heading }}>
+                <Database className="w-5 h-5" style={{ color: colors.primary }} />
+                {t.predefinedPersonaLibrary}
+              </h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-1 rounded hover:bg-black/5">
+                <X className="w-5 h-5" style={{ color: colors.secondary }} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {SCENARIO_LIBRARY.patientPersonas.map((p) => {
+                const isSelected = selectedPersonaId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      setSelectedPersonaId(p.id);
+                      setIsModalOpen(false);
+                    }}
+                    className="flex flex-col text-left p-4 rounded transition-all border group hover:border-primary/50"
+                    style={{
+                      backgroundColor: isSelected ? `${colors.primary}10` : colors.bg,
+                      borderColor: isSelected ? colors.primary : colors.border
+                    }}
+                  >
+                    <div className="flex items-center justify-between w-full mb-2">
+                      <span className="font-bold text-sm" style={{ color: colors.heading }}>{toLabel(p.id)}</span>
+                      {isSelected && <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase" style={{ backgroundColor: colors.primary, color: '#fff' }}>Selected</span>}
+                    </div>
+                    <p className="text-xs mb-4 opacity-80" style={{ color: colors.text }}>{p.description}</p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] w-full" style={{ color: colors.secondary }}>
+                      <div><strong style={{ color: colors.text }}>Mood:</strong> {toLabel(p.baselineMood)}</div>
+                      <div><strong style={{ color: colors.text }}>Stage:</strong> {toLabel(p.diseaseStage.stage)}</div>
+                      <div><strong style={{ color: colors.text }}>Motor:</strong> {toLabel(p.diseaseStage.motorFunction)}</div>
+                      <div><strong style={{ color: colors.text }}>AAC:</strong> {toLabel(p.diseaseStage.communicationAbility)}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

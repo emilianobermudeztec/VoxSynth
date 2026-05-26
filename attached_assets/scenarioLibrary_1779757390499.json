@@ -1,0 +1,313 @@
+{
+  "patientPersonas": [
+    {
+      "id": "anxious_low_energy",
+      "description": "Patient with high anxiety, low energy, and fatigue-dominant behavior",
+
+      "personality": {
+        "O": [0.2, 0.4],
+        "C": [0.3, 0.5],
+        "E": [0.1, 0.3],
+        "A": [0.5, 0.7],
+        "N": [0.7, 0.9]
+      },
+
+      "baselineMood": "nervous",
+      "psychologicalCondition": "high_anxiety",
+
+      "diseaseStage": {
+        "stage": "mid",
+        "motorFunction": "moderate",
+        "communicationAbility": "aac_dependent"
+      },
+
+      "cognitiveFatiguePattern": {
+        "trend": "increasing",
+        "intensity": "medium"
+      }
+    },
+
+    {
+      "id": "severe_depressive_state",
+      "description": "Severely depressed patient with minimal engagement, high withdrawal, and reduced communication effort",
+
+      "personality": {
+        "O": [0.1, 0.3],
+        "C": [0.2, 0.4],
+        "E": [0.05, 0.2],
+        "A": [0.3, 0.6],
+        "N": [0.85, 1.0]
+      },
+
+      "baselineMood": "sad",
+      "psychologicalCondition": "severe_depression",
+
+      "diseaseStage": {
+        "stage": "advanced",
+        "motorFunction": "low",
+        "communicationAbility": "high_dependency_AAC"
+      },
+
+      "cognitiveFatiguePattern": {
+        "trend": "high",
+        "intensity": "very_high"
+      }
+    },
+
+    {
+      "id": "depressed_withdrawn",
+      "description": "Low engagement, depressive tendencies, reduced communication",
+
+      "personality": {
+        "O": [0.2, 0.3],
+        "C": [0.3, 0.5],
+        "E": [0.1, 0.2],
+        "A": [0.4, 0.6],
+        "N": [0.8, 0.95]
+      },
+
+      "baselineMood": "sad",
+      "psychologicalCondition": "depression",
+
+      "diseaseStage": {
+        "stage": "advanced",
+        "motorFunction": "low",
+        "communicationAbility": "high_dependency_AAC"
+      },
+
+      "cognitiveFatiguePattern": {
+        "trend": "high",
+        "intensity": "high"
+      }
+    },
+
+    {
+      "id": "motivated_resilient",
+      "description": "Engaged and emotionally stable patient with adaptive behavior",
+
+      "personality": {
+        "O": [0.6, 0.8],
+        "C": [0.7, 0.9],
+        "E": [0.5, 0.7],
+        "A": [0.6, 0.8],
+        "N": [0.2, 0.4]
+      },
+
+      "baselineMood": "motivated",
+      "psychologicalCondition": "none",
+
+      "diseaseStage": {
+        "stage": "early",
+        "motorFunction": "high",
+        "communicationAbility": "mostly_independent"
+      },
+
+      "cognitiveFatiguePattern": {
+        "trend": "low",
+        "intensity": "low"
+      }
+    },
+
+    {
+      "id": "fatigue_dominant",
+      "description": "Fatigue heavily affects communication patterns and responsiveness",
+
+      "personality": {
+        "O": [0.3, 0.5],
+        "C": [0.4, 0.6],
+        "E": [0.2, 0.4],
+        "A": [0.5, 0.7],
+        "N": [0.6, 0.8]
+      },
+
+      "baselineMood": "fatigued",
+      "psychologicalCondition": "none",
+
+      "diseaseStage": {
+        "stage": "mid",
+        "motorFunction": "moderate",
+        "communicationAbility": "aac_assisted"
+      },
+
+      "cognitiveFatiguePattern": {
+        "trend": "strong_increase",
+        "intensity": "high"
+      }
+    },
+
+    {
+      "id": "socially_engaged",
+      "description": "Maintains active social engagement despite disease",
+
+      "personality": {
+        "O": [0.6, 0.8],
+        "C": [0.6, 0.8],
+        "E": [0.7, 0.9],
+        "A": [0.7, 0.9],
+        "N": [0.2, 0.4]
+      },
+
+      "baselineMood": "positive",
+      "psychologicalCondition": "none",
+
+      "diseaseStage": {
+        "stage": "early",
+        "motorFunction": "high",
+        "communicationAbility": "independent"
+      },
+
+      "cognitiveFatiguePattern": {
+        "trend": "moderate",
+        "intensity": "medium"
+      }
+    },
+
+    {
+      "id": "emotionally_unstable",
+      "description": "Frequent emotional fluctuations and inconsistent communication behavior",
+
+      "personality": {
+        "O": [0.4, 0.6],
+        "C": [0.3, 0.5],
+        "E": [0.2, 0.5],
+        "A": [0.4, 0.6],
+        "N": [0.8, 0.95]
+      },
+
+      "baselineMood": "moody",
+      "psychologicalCondition": "emotional_instability",
+
+      "diseaseStage": {
+        "stage": "mid",
+        "motorFunction": "moderate",
+        "communicationAbility": "aac_dependent"
+      },
+
+      "cognitiveFatiguePattern": {
+        "trend": "variable",
+        "intensity": "medium"
+      }
+    }
+  ],
+
+  "interlocutors": [
+    {
+      "id": "doctor",
+      "role": "Doctor",
+      "communicationStyle": "professional",
+      "empathyLevel": "medium"
+    },
+    {
+      "id": "caregiver",
+      "role": "Caregiver",
+      "communicationStyle": "supportive",
+      "empathyLevel": "high"
+    },
+    {
+      "id": "family_member",
+      "role": "Family Member",
+      "communicationStyle": "informal",
+      "empathyLevel": "high"
+    },
+    {
+      "id": "friend",
+      "role": "Friend",
+      "communicationStyle": "casual",
+      "empathyLevel": "medium"
+    },
+    {
+      "id": "therapist",
+      "role": "Therapist",
+      "communicationStyle": "empathetic",
+      "empathyLevel": "very_high"
+    }
+  ],
+
+  "conversationContexts": [
+    {
+      "id": "daily_chat",
+      "description": "Casual everyday interaction",
+      "tone": "neutral"
+    },
+    {
+      "id": "medical_consultation",
+      "description": "Clinical discussion with a doctor",
+      "tone": "structured"
+    },
+    {
+      "id": "emotional_support",
+      "description": "Conversation focused on emotional support and mental state",
+      "tone": "supportive"
+    },
+    {
+      "id": "routine_update",
+      "description": "Daily status or symptom updates",
+      "tone": "informative"
+    },
+    {
+      "id": "symptom_reporting",
+      "description": "Patient describing physical or cognitive symptoms",
+      "tone": "clinical"
+    },
+    {
+      "id": "functional_decline",
+      "description": "Discussion about loss of abilities (speech, movement)",
+      "tone": "emotional"
+    },
+    {
+      "id": "aac_frustration",
+      "description": "Difficulty or frustration using assistive communication device",
+      "tone": "frustrated"
+    },
+    {
+      "id": "care_planning",
+      "description": "Planning care, routines, or medical adjustments",
+      "tone": "structured"
+    }
+  ],
+
+  "situationalVariables": [
+    {
+      "id": "morning_routine",
+      "timeOfDay": "morning",
+      "recentEvents": ["rested"],
+      "emotionalTriggers": ["neutral"]
+    },
+    {
+      "id": "evening_fatigue",
+      "timeOfDay": "evening",
+      "recentEvents": ["long_day"],
+      "emotionalTriggers": ["fatigue", "low_energy"]
+    },
+    {
+      "id": "after_bad_news",
+      "timeOfDay": "afternoon",
+      "recentEvents": ["stressful_event"],
+      "emotionalTriggers": ["anxiety", "sadness"]
+    },
+    {
+      "id": "post_medication",
+      "timeOfDay": "night",
+      "recentEvents": ["medication_taken"],
+      "emotionalTriggers": ["drowsiness"]
+    },
+    {
+      "id": "motor_loss_event",
+      "timeOfDay": "evening",
+      "recentEvents": ["loss_of_function"],
+      "emotionalTriggers": ["frustration", "sadness"]
+    },
+    {
+      "id": "unexpected_good_day",
+      "timeOfDay": "afternoon",
+      "recentEvents": ["improved_condition"],
+      "emotionalTriggers": ["hope", "calm"]
+    },
+    {
+      "id": "device_issue",
+      "timeOfDay": "night",
+      "recentEvents": ["aac_issue"],
+      "emotionalTriggers": ["frustration", "stress"]
+    }
+  ]
+}
