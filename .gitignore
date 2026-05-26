@@ -47,3 +47,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+voxsynth-front.tar.gz
+node_modules/
+.env
