@@ -1,0 +1,133 @@
+{
+  "interlocutor": ["doctor", "friend", "caregiver", "family"],
+
+  "empathyLevel": ["low", "medium", "high"],
+
+  "conversationDuration": ["<1_month", "1-3_months", ">3_months"],
+
+  "weeklyFrequency": {
+    "type": "integer",
+    "min": 1,
+    "max": 7
+  },
+
+  "conversationLength": {
+    "type": "integer",
+    "min": 8,
+    "max": 20,
+    "unit": "turns_per_day"
+  },
+
+  "conversationTopic": [
+    "health",
+    "news_family_friends",
+    "basic_needs",
+    "hobbies",
+    "day_to_day"
+  ],
+
+  "trajectory": ["worsening", "stable", "improving"],
+
+  "emotionalVolatility": ["low", "medium", "high"],
+
+  "initialEmotion": ["sadness", "anger", "fear", "frustration", "joy"],
+
+  "psychologicalCondition": [
+    "depresion",
+    "suicidal_thoughts",
+    "anxiety",
+    "bipolarity",
+    "none"
+  ],
+
+  "patientPersonas": [
+    {
+      "id": "anxious_low_energy",
+      "description": "Patient with high anxiety, low energy, and fatigue-dominant behavior",
+      "personality": {
+      "O": { "mean": 0.30, "std": 0.10 },
+      "C": { "mean": 0.40, "std": 0.10 },
+      "E": { "mean": 0.20, "std": 0.08 },
+      "A": { "mean": 0.60, "std": 0.10 },
+      "N": { "mean": 0.80, "std": 0.09 }
+    }
+    },
+
+    {
+      "id": "severe_depressive_state",
+      "description": "Severely depressed patient with minimal engagement, high withdrawal, and reduced communication effort",
+      "personality": {
+      "O": { "mean": 0.20, "std": 0.08 },
+      "C": { "mean": 0.30, "std": 0.10 },
+      "E": { "mean": 0.12, "std": 0.07 },
+      "A": { "mean": 0.45, "std": 0.12 },
+      "N": { "mean": 0.92, "std": 0.06 }
+    }
+    },
+
+    {
+      "id": "depressed_withdrawn",
+      "description": "Low engagement, depressive tendencies, reduced communication",
+
+      "personality": {
+      "O": { "mean": 0.25, "std": 0.08 },
+      "C": { "mean": 0.40, "std": 0.10 },
+      "E": { "mean": 0.15, "std": 0.07 },
+      "A": { "mean": 0.50, "std": 0.10 },
+      "N": { "mean": 0.87, "std": 0.07 }
+    }
+    },
+
+    {
+      "id": "motivated_resilient",
+      "description": "Engaged and emotionally stable patient with adaptive behavior",
+
+      "personality": {
+      "O": { "mean": 0.70, "std": 0.10 },
+      "C": { "mean": 0.80, "std": 0.09 },
+      "E": { "mean": 0.60, "std": 0.10 },
+      "A": { "mean": 0.70, "std": 0.10 },
+      "N": { "mean": 0.30, "std": 0.10 }
+    }
+    },
+
+    {
+      "id": "fatigue_dominant",
+      "description": "Fatigue heavily affects communication patterns and responsiveness",
+
+      "personality": {
+      "O": { "mean": 0.40, "std": 0.12 },
+      "C": { "mean": 0.50, "std": 0.11 },
+      "E": { "mean": 0.30, "std": 0.10 },
+      "A": { "mean": 0.60, "std": 0.10 },
+      "N": { "mean": 0.70, "std": 0.12 }
+    }
+    },
+
+    {
+      "id": "socially_engaged",
+      "description": "Maintains active social engagement despite disease",
+
+      "personality": {
+      "O": { "mean": 0.70, "std": 0.10 },
+      "C": { "mean": 0.70, "std": 0.10 },
+      "E": { "mean": 0.80, "std": 0.09 },
+      "A": { "mean": 0.80, "std": 0.08 },
+      "N": { "mean": 0.30, "std": 0.10 }
+    }
+    },
+
+    {
+      "id": "emotionally_unstable",
+      "description": "Frequent emotional fluctuations and inconsistent communication behavior",
+
+      "personality": {
+      "O": { "mean": 0.50, "std": 0.13 },
+      "C": { "mean": 0.40, "std": 0.12 },
+      "E": { "mean": 0.35, "std": 0.15 },
+      "A": { "mean": 0.50, "std": 0.12 },
+      "N": { "mean": 0.87, "std": 0.08 }
+    }
+    }
+  ]
+}
